@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Items>
+	<Item id="woc_healing_herb"
+		  name="A Healing Herb"
+		  mesh="flora_reed_c"
+		  item_category="woc_herbs"
+		  IsFood="false"
+		  value="100"
+		  weight="1"
+		  Type="Goods">
+		<Flags Civilian="true" />
+	</Item>
+</Items>
