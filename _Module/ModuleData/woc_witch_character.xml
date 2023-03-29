@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NPCCharacters>
+  <NPCCharacter id="woc_witch_character"
+                default_group="Infantry"
+                name="Herb Witch"
+                occupation="Townsfolk"
+				is_female="true"
+                culture="Culture.aserai">
+    <face>
+      <!--face_key value="000507400600141300000000000000100000000000000000000000000000000000010bacf10000000000000000000000000000000000000000000000000000c1" max_value="001cffffd50034d4fffffffffff0fffffffffffffffffffffffffeffffffffff00010baff1ffffff000000000000000000000000000000000000000000008101" /-->
+      <BodyProperties version="4"
+                      age="49.19"
+                      weight="0.1661"
+                      build="0.0462"
+                      key="000504000600141300000000000200100000000000000000000000000000000000012BA6010000000000000000000000000000000000000000000000000000C1" />
+      <BodyPropertiesMax version="4"
+                         age="74.26"
+                         weight="0.6145"
+                         build="0.6767"
+                         key="001CFC0FD50034D4FFFFFFFFFFF9FFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFF000A9BA90AFFFFFF000000000000000000000000000000000000000000F08101" />
+    </face>
+    <skills></skills>
+    <!-- Uses village hair -->
+    <Equipments>
+       <EquipmentRoster civilian="true">
+       <equipment slot="Head"
+                   id="Item.aserai_villager_female_headdress" />
+       <equipment slot="Body"
+                   id="Item.cut_dress_with_pouch" />
+       <equipment slot="Cape"
+                   id="Item.a_battania_cloak_a" />
+		<equipment slot="Leg"
+					id="Item.strapped_shoes" />
+      </EquipmentRoster>
+      <EquipmentSet id="npc_wanderer_equipment_template_empire" />
+    </Equipments>
+  </NPCCharacter>
+</NPCCharacters>
