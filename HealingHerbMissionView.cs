@@ -1,5 +1,4 @@
-﻿using System;
-using TaleWorlds.CampaignSystem.Party;
+﻿using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Roster;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
@@ -47,16 +46,16 @@ namespace WitchesOfCalradia
                 items.AddToCounts(healingHerb, -1);
                 agent.BaseHealthLimit = 10;
                 InformationManager.DisplayMessage(new InformationMessage(
-                    String.Format("You gather your last bit of strenght to eat a healing herb.\nYour maximum health is now {0}", agent.BaseHealthLimit)
+                    ($"You gather your last bit of strenght to eat a healing herb.\nYour maximum health is now {agent.BaseHealthLimit}")
                     ));
             }
             else
             {
                 items.AddToCounts(healingHerb, -1);
-                agent.BaseHealthLimit -= 30;
+                agent.BaseHealthLimit -= 45;
                 agent.Health = agent.BaseHealthLimit;
                 InformationManager.DisplayMessage(new InformationMessage(
-                    String.Format("You restored your health, but you suffer side effects!\nYour maximum health is now {0}", agent.BaseHealthLimit)
+                    ($"You restored your health, but you suffer side effects!\nYour maximum health is now {agent.BaseHealthLimit}")
                     ));
             }
 

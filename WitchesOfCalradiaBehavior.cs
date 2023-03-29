@@ -16,12 +16,12 @@ namespace WitchesOfCalradia
     {
         ItemObject _healingHerb;
         CharacterObject _herbWitch;
-        MBReadOnlyList<Village> _villageList = new MBReadOnlyList<Village>();
+        MBArrayList<Village> _villageList = new MBArrayList<Village>();
         Village _witchLocation;
 
         public override void RegisterEvents()
         {
-            CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, DailyTick);
+            CampaignEvents.WeeklyTickEvent.AddNonSerializedListener(this, WeeklyTickEvent);
             CampaignEvents.LocationCharactersAreReadyToSpawnEvent.AddNonSerializedListener(this, LocationCharactersAreReadyToSpawn);
             CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
         }
@@ -30,14 +30,14 @@ namespace WitchesOfCalradia
         {
             _healingHerb = MBObjectManager.Instance.GetObject<ItemObject>("woc_healing_herb");
             _herbWitch = MBObjectManager.Instance.GetObject<CharacterObject>("woc_witch_character");
-            for (int i = 1; i < Village.All.Count; i++)
+            for (int i = 0; i < Village.All.Count; i++)
             {
                 if (Village.All[i].Bound.Culture.StringId is "vlandia" or "empire" || Village.All[i].IsCastle) continue;
                 _villageList.Add(Village.All[i]);
 
             }
 
-            _witchLocation = WitchLocation();
+            WitchLocation();
             AddDialogs(starter);
         }
 
@@ -58,12 +58,12 @@ namespace WitchesOfCalradia
             starter.AddPlayerLine("herb_witch_buy", "herb_witch", "herb_witch_bought", "I am looking for herbs", null, 
                 () => { 
                     Hero.MainHero.ChangeHeroGold(-800);
-                    MobileParty.MainParty.ItemRoster.AddToCounts(_healingHerb, 5);
+                    MobileParty.MainParty.ItemRoster.AddToCounts(_healingHerb, 3);
                 }, 100,
                 (out TextObject explanation) => {
                     if (Hero.MainHero.Gold < 800)
                         {
-                            explanation = new TextObject("You do not have enough denars, traveller.");
+                            explanation = new TextObject("You do not have enough denars.");
                             return false;
                         }
                     explanation = TextObject.Empty;
@@ -96,13 +96,13 @@ namespace WitchesOfCalradia
 
         private Village WitchLocation()
         {
-            return _witchLocation = _villageList[MBRandom.RandomInt(0, _villageList.Count)];
-
+            return _witchLocation = _villageList[MBRandom.RandomInt(_villageList.Count)];
         }
 
 
-        private void DailyTick()
+        private void WeeklyTickEvent()
         {
+           
             WitchLocation();
         }
 
