@@ -11,6 +11,7 @@ namespace WitchesOfCalradia
 {
     public class HealingHerbMissionView : MissionView
     {
+
         public override void OnMissionScreenTick(float dt)
         {
             base.OnMissionScreenTick(dt);

@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Policy;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.AgentOrigins;
+using TaleWorlds.CampaignSystem.Conversation;
 using TaleWorlds.CampaignSystem.Encounters;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.CampaignSystem.Settlements.Locations;
 using TaleWorlds.CampaignSystem.Settlements.Workshops;
 using TaleWorlds.Core;
+using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.ObjectSystem;
 
@@ -16,34 +21,46 @@ namespace WitchesOfCalradia
     public class WitchesOfCalradiaBehavior : CampaignBehaviorBase
     {
         ItemObject _healingHerb;
+        CharacterObject _herbWitch;
+        MBReadOnlyList<Village> _villageList = new MBReadOnlyList<Village>();
+        Village _witchLocation;
+
         public override void RegisterEvents()
         {
-            CampaignEvents.OnWorkshopChangedEvent.AddNonSerializedListener(this, OnWorkshopChangedEvent);
-            CampaignEvents.DailyTickTownEvent.AddNonSerializedListener(this, DailyTick);
+            CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, DailyTick);
             CampaignEvents.LocationCharactersAreReadyToSpawnEvent.AddNonSerializedListener(this, LocationCharactersAreReadyToSpawn);
             CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
-
         }
 
         private void OnSessionLaunched(CampaignGameStarter starter)
         {
             _healingHerb = MBObjectManager.Instance.GetObject<ItemObject>("woc_healing_herb");
+            _herbWitch = MBObjectManager.Instance.GetObject<CharacterObject>("woc_witch_character");
+            for (int i = 1; i < Village.All.Count; i++)
+            {
+                if (Village.All[i].Bound.Culture.StringId is "vlandia" or "empire" || Village.All[i].IsCastle) continue;
+                _villageList.Add(Village.All[i]);
+
+            }
+
+            _witchLocation = WitchLocation();
             AddDialogs(starter);
         }
 
         private void AddDialogs(CampaignGameStarter starter)
         {
 
-      
-            starter.AddPlayerLine("tavernkeeper_talk_ask_witches", "tavernkeeper_talk", "tavernkeeper_witches", "I am looking for the town witch, do you know where she is?", null, null);
+            starter.AddPlayerLine("tavernkeeper_talk_ask_witches", "tavernkeeper_talk", "tavernkeeper_witches", "I am looking for the witch, have you heard about her whereabouts?", null, null);
             starter.AddDialogLine("tavernkeeper_talk_witches", "tavernkeeper_witches", "close_window", "Witches? If I knew I would make sure she burns next to you. Get our of here you barbarian!",
-                () => (Settlement.CurrentSettlement.Culture.StringId == "vlandia" || Settlement.CurrentSettlement.Culture.StringId == "empire") ? true : false, null);
-            starter.AddDialogLine("tavernkeeper_talk_witches", "tavernkeeper_witches", "tavernkeeper_talk_witch", "Yes, I've seen her roaming around the town.", null, null);
-            starter.AddPlayerLine("tavernkeeper_talk_witches", "tavernkeeper_talk_witch", "close_window", "Thank you, I will look for her.", null, null);
+                () => (Settlement.CurrentSettlement.Culture.StringId == "vlandia" || Settlement.CurrentSettlement.Culture.StringId == "empire"), null);
+            starter.AddDialogLine("tavernkeeper_talk_witches", "tavernkeeper_witches", "tavernkeeper_talk_witch", "I head a caravan of traders mentioned something about a witch in a village nearby. You may find her in a neighbouring village.", 
+                () => (Settlement.CurrentSettlement.Name == _witchLocation.TradeBound.Name), null);
+            starter.AddDialogLine("tavernkeeper_talk_witches", "tavernkeeper_witches", "tavernkeeper_talk_witch_negative", "No, I have not hear anything recently.", null, null);
+            starter.AddPlayerLine("tavernkeeper_talk_witches", "tavernkeeper_talk_witch", "close_window", "Thank you for the information.", null, null);
 
 
             starter.AddDialogLine("herb_witch", "start", "herb_witch", "Hello traveller, what do you need?", 
-                () => CharacterObject.OneToOneConversationCharacter == Settlement.CurrentSettlement.Culture.FemaleBeggar, null);
+                () => CharacterObject.OneToOneConversationCharacter == _herbWitch, null);
             starter.AddPlayerLine("herb_witch_buy", "herb_witch", "herb_witch_bought", "I am looking for herbs", null, 
                 () => { 
                     Hero.MainHero.ChangeHeroGold(-800);
@@ -65,49 +82,39 @@ namespace WitchesOfCalradia
 
         private void LocationCharactersAreReadyToSpawn(Dictionary<string, int> unusedUsablePointCount)
         {
-            Location locationWithId = Settlement.CurrentSettlement.LocationComplex.GetLocationWithId("center");
             Settlement settlement = PlayerEncounter.LocationEncounter.Settlement;
-
-            if (!(CampaignMission.Current.Location == locationWithId && CampaignTime.Now.IsDayTime)) return; 
-            if(Settlement.CurrentSettlement.Culture.StringId == "vlandia" || Settlement.CurrentSettlement.Culture.StringId == "empire") return;
-
-            CharacterObject femaleBeggar = Settlement.CurrentSettlement.Culture.FemaleBeggar;
-            Monster monsterWithSuffix = TaleWorlds.Core.FaceGen.GetMonsterWithSuffix(femaleBeggar.Race, "_settlement");
-
-            foreach (Workshop workshop in settlement.Town.Workshops)
+            Location locationWithId = settlement.LocationComplex.GetLocationWithId("village_center");
+            Monster monsterWithSuffix = TaleWorlds.Core.FaceGen.GetMonsterWithSuffix(_herbWitch.Race, "_settlement");
+            
+            if (CampaignMission.Current.Location == locationWithId && settlement.Name == _witchLocation.Name)
             {
-                if (workshop.IsRunning);
-                {
-                    int num;
-                    unusedUsablePointCount.TryGetValue(workshop.Tag, out num);
-                    if (num > 0)
-                    {
-                        LocationCharacter locationCharacter = new LocationCharacter(
-                            new AgentData(new SimpleAgentOrigin(femaleBeggar))
-                            .Monster(monsterWithSuffix)
-                            .Age(MBRandom.RandomInt(60, 80)),
-                            new LocationCharacter.AddBehaviorsDelegate(SandBoxManager.Instance.AgentBehaviorManager.AddWandererBehaviors),
-                            workshop.Tag, true, LocationCharacter.CharacterRelations.Neutral, null, true, false, null, false, false, true);
+                LocationCharacter witchCharacter = new LocationCharacter(
+                    new AgentData(new SimpleAgentOrigin(_herbWitch))
+                    .Monster(monsterWithSuffix)
+                    .Age(MBRandom.RandomInt(70, 100)),
+                    new LocationCharacter.AddBehaviorsDelegate(SandBoxManager.Instance.AgentBehaviorManager.AddWandererBehaviors),
+                   "npc-common", true, LocationCharacter.CharacterRelations.Neutral, null, true, false, null, false, false, true);
 
-                        locationWithId.AddCharacter(locationCharacter);
-                    }
-                }
+                locationWithId.AddCharacter(witchCharacter);
             }
+
         }
 
-        private void DailyTick(Town town)
+        private Village WitchLocation()
         {
-            //throw new NotImplementedException();
+            return _witchLocation = _villageList[MBRandom.RandomInt(0, _villageList.Count)];
+
         }
 
-        private void OnWorkshopChangedEvent(Workshop workshop, Hero oldOwningHero, WorkshopType workshopType)
+
+        private void DailyTick()
         {
-            throw new NotImplementedException();
+            WitchLocation();
         }
 
         public override void SyncData(IDataStore dataStore)
         {
-            //throw new System.NotImplementedException();
+            //
         }
     }
 }
