@@ -14,7 +14,7 @@ namespace WitchesOfCalradia
         public override void OnMissionScreenTick(float dt)
         {
             base.OnMissionScreenTick(dt);
-            
+
             if (Input.IsKeyPressed(TaleWorlds.InputSystem.InputKey.Q))
             {
                 EatHealingHerb();
@@ -37,7 +37,7 @@ namespace WitchesOfCalradia
             {
                 InformationManager.DisplayMessage(new InformationMessage("The herb wouldn't have any effect... You decide not to eat it."));
             }
-            else if(agent.BaseHealthLimit <= 10)
+            else if (agent.BaseHealthLimit <= 10)
             {
                 InformationManager.DisplayMessage(new InformationMessage("You're too weak, the plant would kill you"));
             }

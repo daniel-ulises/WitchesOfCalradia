@@ -16,7 +16,7 @@ namespace WitchesOfCalradia
     {
         ItemObject _healingHerb;
         CharacterObject _herbWitch;
-        MBArrayList<Village> _villageList = new MBArrayList<Village>();
+        MBList<Village> _villageList = new MBList<Village>();
         Village _witchLocation;
 
         public override void RegisterEvents()
@@ -47,25 +47,25 @@ namespace WitchesOfCalradia
             starter.AddPlayerLine("tavernkeeper_talk_ask_witches", "tavernkeeper_talk", "tavernkeeper_witches", "I am looking for the witch, have you heard about her whereabouts?", null, null);
             starter.AddDialogLine("tavernkeeper_talk_witches", "tavernkeeper_witches", "close_window", "Witches? If I knew I would make sure she burns next to you. Get our of here you barbarian!",
                 () => (Settlement.CurrentSettlement.Culture.StringId == "vlandia" || Settlement.CurrentSettlement.Culture.StringId == "empire"), null);
-            starter.AddDialogLine("tavernkeeper_talk_witches", "tavernkeeper_witches", "tavernkeeper_talk_witch", "I head a caravan of traders mentioned something about a witch in a village nearby. You may find her in a neighbouring village.", 
+            starter.AddDialogLine("tavernkeeper_talk_witches", "tavernkeeper_witches", "tavernkeeper_talk_witch", "I head a caravan of traders mentioned something about a witch in a village nearby. You may find her in a neighbouring village.",
                 () => (Settlement.CurrentSettlement.Name == _witchLocation.TradeBound.Name), null);
             starter.AddDialogLine("tavernkeeper_talk_witches", "tavernkeeper_witches", "tavernkeeper_talk_witch_negative", "No, I have not hear anything recently.", null, null);
             starter.AddPlayerLine("tavernkeeper_talk_witches", "tavernkeeper_talk_witch", "close_window", "Thank you for the information.", null, null);
 
 
-            starter.AddDialogLine("herb_witch", "start", "herb_witch", "Hello traveller, what do you need?", 
+            starter.AddDialogLine("herb_witch", "start", "herb_witch", "Hello traveller, what do you need?",
                 () => CharacterObject.OneToOneConversationCharacter == _herbWitch, null);
-            starter.AddPlayerLine("herb_witch_buy", "herb_witch", "herb_witch_bought", "I am looking for herbs", null, 
-                () => { 
+            starter.AddPlayerLine("herb_witch_buy", "herb_witch", "herb_witch_bought", "I am looking for herbs", null,
+                () => {
                     Hero.MainHero.ChangeHeroGold(-800);
                     MobileParty.MainParty.ItemRoster.AddToCounts(_healingHerb, 3);
                 }, 100,
                 (out TextObject explanation) => {
                     if (Hero.MainHero.Gold < 800)
-                        {
-                            explanation = new TextObject("You do not have enough denars.");
-                            return false;
-                        }
+                    {
+                        explanation = new TextObject("You do not have enough denars.");
+                        return false;
+                    }
                     explanation = TextObject.Empty;
                     return true;
                 });
@@ -78,8 +78,8 @@ namespace WitchesOfCalradia
         {
             Settlement settlement = PlayerEncounter.LocationEncounter.Settlement;
             Location locationWithId = settlement.LocationComplex.GetLocationWithId("village_center");
-            Monster monsterWithSuffix = TaleWorlds.Core.FaceGen.GetMonsterWithSuffix(_herbWitch.Race, "_settlement");
-            
+            Monster monsterWithSuffix = FaceGen.GetMonsterWithSuffix(_herbWitch.Race, "_settlement");
+
             if (CampaignMission.Current.Location == locationWithId && settlement.Name == _witchLocation.Name)
             {
                 LocationCharacter witchCharacter = new LocationCharacter(
@@ -87,7 +87,7 @@ namespace WitchesOfCalradia
                     .Monster(monsterWithSuffix)
                     .Age(MBRandom.RandomInt(70, 100)),
                     new LocationCharacter.AddBehaviorsDelegate(SandBoxManager.Instance.AgentBehaviorManager.AddWandererBehaviors),
-                   "npc-common", true, LocationCharacter.CharacterRelations.Neutral, null, true, false, null, false, false, true);
+                   "npc-common", false, LocationCharacter.CharacterRelations.Neutral, null, true, false, null, false, false, true);
 
                 locationWithId.AddCharacter(witchCharacter);
             }
@@ -102,7 +102,7 @@ namespace WitchesOfCalradia
 
         private void WeeklyTickEvent()
         {
-           
+
             WitchLocation();
         }
 

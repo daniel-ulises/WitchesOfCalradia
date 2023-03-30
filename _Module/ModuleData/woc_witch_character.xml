@@ -4,7 +4,7 @@
                 default_group="Infantry"
                 name="Herb Witch"
                 occupation="Townsfolk"
-				is_female="true"
+				        is_female="true"
                 culture="Culture.aserai">
     <face>
       <!--face_key value="000507400600141300000000000000100000000000000000000000000000000000010bacf10000000000000000000000000000000000000000000000000000c1" max_value="001cffffd50034d4fffffffffff0fffffffffffffffffffffffffeffffffffff00010baff1ffffff000000000000000000000000000000000000000000008101" /-->
@@ -24,15 +24,15 @@
     <Equipments>
        <EquipmentRoster civilian="true">
        <equipment slot="Head"
-                   id="Item.aserai_villager_female_headdress" />
+                    id="Item.aserai_villager_female_headdress" />
        <equipment slot="Body"
-                   id="Item.cut_dress_with_pouch" />
+                    id="Item.cut_dress_with_pouch" />
        <equipment slot="Cape"
-                   id="Item.a_battania_cloak_a" />
-		<equipment slot="Leg"
-					id="Item.strapped_shoes" />
+                    id="Item.battania_civil_cloak" />
+		  <equipment slot="Leg"
+					          id="Item.strapped_shoes" />
       </EquipmentRoster>
-      <EquipmentSet id="npc_wanderer_equipment_template_empire" />
+      <EquipmentSet id="npc_wanderer_equipment_template_aserai" />
     </Equipments>
   </NPCCharacter>
 </NPCCharacters>
